@@ -1,0 +1,75 @@
+/* Interface */
+#define function number() view returns (uint256) 
+#define function setNumber(uint256) nonpayable returns ()
+#define function add(uint256) nonpayable returns (uint256) 
+
+/* Storage Slots */
+#define constant NUMBER_SLOT = FREE_STORAGE_POINTER()
+
+/* Methods */
+#define macro GET_NUMBER() = takes (0) returns (0) {
+    [NUMBER_SLOT] // stack: [NUMBER_SLOT]
+    sload         // stack: [number]
+    0x00 mstore  // stack: [] memory: [0x00: number]
+    0x20 0x00 return
+    stop
+}
+
+#define macro SET_NUMBER() = takes(0) returns (0) {
+    0x04 calldataload  // stack: [func_parameter]
+    [NUMBER_SLOT]      // stack: [NUMBER_SLOT, func_parameter]
+    sstore             // stack: []
+    stop
+}
+
+// can be optimized with only calling sload once
+#define macro ADD() = takes(0) returns (0) {
+    // check if it's overflow
+    [NUMBER_SLOT]      // stack: [NUMBER_SLOT]
+    sload              // stack: [number]
+    dup1               // stack: [number, number]
+    0x04 calldataload  // stack: [increment, number, number]
+    add                // stack: [sum, number]
+    lt                 // stack: [is_overflow]
+    is_overflow jumpi  // stack: []
+
+    // do sum
+    [NUMBER_SLOT]      // stack: [NUMBER_SLOT]
+    dup1               // stack: [NUMBER_SLOT, NUMBER_SLOT]
+    sload              // stack: [number, NUMBER_SLOT]
+    0x04 calldataload  // stack: [increment, number, NUMBER_SLOT]
+    add                // stack: [sum, NUMBER_SLOT]
+    dup1               // stack: [sum, sum, NUMBER_SLOT]
+    swap2              // stack: [NUMBER_SLOT, sum, sum]
+    sstore             // stack: [sum]
+    0x00 mstore
+    0x20 0x00 return
+
+    is_overflow:
+        0x00 0x00 revert
+}
+
+#define macro MAIN() = takes (0) returns (0) {
+    // get function selector
+    0x00 calldataload 0xE0 shr // stack: [func_selector]
+
+    // function dispatching
+    // check if it's function number()
+    dup1                               // stack: [func_selector, func_selector]
+    __FUNC_SIG(number)                 // stack: [func_sig(number), func_selector, func_selector]
+    eq                                 // stack: [is_number_func, func_selector]
+    getJump                            // stack: [getJump, is_number_func, func_selector]
+    jumpi                              // stack: [func_selector]
+    
+    // check if it's function setNumber(uint256)
+    dup1 __FUNC_SIG(setNumber) eq setJump jumpi
+    // check if it's function add()
+    dup1 __FUNC_SIG(add) eq addJump jumpi
+
+    getJump:
+        GET_NUMBER()
+    setJump:
+        SET_NUMBER()
+    addJump:
+        ADD()
+}

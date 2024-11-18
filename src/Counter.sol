@@ -1,14 +1,21 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
 
-contract Counter {
+import "./interface/ICounter.sol";
+
+contract Counter is ICounter {
     uint256 public number;
 
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
+    constructor(uint256 _number) {
+        number = _number;
     }
 
-    function increment() public {
-        number++;
+    function setNumber(uint256 _newNumber) public {
+        number = _newNumber;
+    }
+
+    function add(uint256 _increment) public returns (uint256) {
+        number += _increment;
+        return number;
     }
 }

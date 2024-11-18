@@ -1,22 +1,13 @@
-## Foundry
+## Summary
+In this project, we use Yul & Huff to write a basic solidity smart contract.
+- [Counter.sol](src/Counter.sol): Solidity implementation
+- [Counter_yul.sol](src/Counter_yul.sol): Yul assembly in Solidity
+- [Counter.huff](src/Counter.huff): Huff Implementation
+- [Counter.yul](src/Counter.yul): Pure Yul Implementation (the tests haven't covered this file)
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
+The implementations are covered by unit tests and fuzz tests.
 
 ### Build
-
 ```shell
 $ forge build
 ```
@@ -27,40 +18,25 @@ $ forge build
 $ forge test
 ```
 
-### Format
-
-```shell
-$ forge fmt
-```
-
 ### Gas Snapshots
 
 ```shell
 $ forge snapshot
 ```
 
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+Result:
+```javascript
+[PASS] testFuzz_SetHuffValue(uint256) (runs: 1001, μ: 30728, ~: 30967)
+[PASS] testFuzz_SetYulValue(uint256) (runs: 1001, μ: 31046, ~: 31285)
+[PASS] testHuff_AddOne() (gas: 31090)
+[PASS] testHuff_Overflow() (gas: 32059)
+[PASS] testHuff_ReadValue() (gas: 10232)
+[PASS] testSol_AddOne() (gas: 31469)
+[PASS] testSol_Overflow() (gas: 32762)
+[PASS] testSol_ReadValue() (gas: 10503)
+[PASS] testSol_SetValue(uint256) (runs: 1001, μ: 31084, ~: 31323)
+[PASS] testStatefulFuzz_AddCompare(uint256[]) (runs: 1001, μ: 1126914, ~: 1122116)
+[PASS] testYul_AddOne() (gas: 31188)
+[PASS] testYul_Overflow() (gas: 32368)
+[PASS] testYul_ReadValue() (gas: 10387)
 ```
